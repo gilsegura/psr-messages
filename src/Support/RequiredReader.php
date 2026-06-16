@@ -14,6 +14,10 @@ use Psr\Messages\Exception\UnexpectedStateException;
  */
 final class RequiredReader
 {
+    private function __construct()
+    {
+    }
+
     /**
      * @param array<string, mixed> $data
      *
@@ -49,19 +53,19 @@ final class RequiredReader
     /**
      * @param array<string, mixed> $data
      *
-     * @return array<string, mixed>
+     * @return array<array-key, mixed>
      *
      * @throws UnexpectedStateException
      */
     public static function nested(array $data, string $key): array
     {
-        $value = $data[$key] ?? null;
-
-        if (!\is_array($value)) {
+        if (
+            !isset($data[$key])
+            || !\is_array($data[$key])
+        ) {
             throw UnexpectedStateException::reason(\sprintf('the %s field must be a present object after validation.', $key));
         }
 
-        /* @var array<string, mixed> $value */
-        return $value;
+        return $data[$key];
     }
 }
