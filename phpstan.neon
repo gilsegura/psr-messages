@@ -1,0 +1,34 @@
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+parameters:
+    level: max
+    phpVersion: 80400
+    paths:
+        - src
+        - tests
+    tmpDir: var/phpstan
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # --- src: the response factories pass our documents (valid
+        # SerializableInterface<array<string, mixed>>) to psr-server's ResponseFactory, whose
+        # TAttributes template is invariant. Cross-package variance limitation, not a real error.
+        -
+            identifier: argument.type
+            path: src/Json/JsonResponseFactory.php
+        -
+            identifier: argument.type
+            path: src/JsonApi/JsonApiResponseFactory.php
+        # --- tests: passing concrete documents/schemas/attributes (valid
+        # SerializableInterface / SchemaInterface) into resolvers, documents, resource objects
+        # and the JsonDocument trips the same invariant-template check. The objects are correct;
+        # the limitation is in the third-party template variance.
+        -
+            identifier: argument.type
+            paths:
+                - tests
+        # --- tests: decoded JSON and serialize() output are mixed-valued; asserting on nested
+        # offsets / counts / array keys is idiomatic here and guarded by the assertions.
+        -
+            identifier: offsetAccess.nonOffsetAccessible
+            paths:
+                - tests

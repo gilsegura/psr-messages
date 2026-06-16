@@ -1,0 +1,40 @@
+{
+    "name": "gilsegura/psr-messages",
+    "description": "Media-type-aware PSR-7 message parsing and rendering. It turns a validated\nrequest into typed input objects and turns your domain output into a correctly\nshaped response body, for both plain JSON and [JSON:API](https://jsonapi.org)\n(v1.1). It is framework-agnostic and integrates through PSR-15 middleware.",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.4",
+        "ext-json": "*",
+        "gilsegura/psr-server": "^1.0",
+        "gilsegura/psr-validator": "^1.0",
+        "gilsegura/serializer": "^1.0",
+        "psr/http-message": "^2.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "nyholm/psr7": "^1.8",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^13.1",
+        "rector/rector": "^2.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Psr\\Messages\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Psr\\Messages\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
