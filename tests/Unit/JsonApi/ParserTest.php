@@ -52,4 +52,22 @@ final class ParserTest extends TestCase
         self::assertTrue($parser->supports(MediaType::JSON));
         self::assertFalse($parser->supports(MediaType::JSON_API));
     }
+
+    #[Test]
+    public function json_parser_resolves_the_body_into_a_typed_schema(): void
+    {
+        $parser = new JsonParser(new SchemaResolver(UpperSchema::class));
+
+        $request = new ServerRequest(
+            'POST',
+            'https://api.example.com/things',
+            ['Content-Type' => 'application/json'],
+            '{"kind":"upper","value":"hello"}',
+        );
+
+        $parsed = $parser->parse($request)->getParsedBody();
+
+        self::assertInstanceOf(UpperSchema::class, $parsed);
+        self::assertSame('HELLO', $parsed->value);
+    }
 }

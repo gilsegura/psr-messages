@@ -13,10 +13,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Messages\Exception\UnsupportedMediaTypeException;
 use Psr\Messages\JsonApi\JsonApiParser;
-use Psr\Messages\JsonApi\Query\JsonApiQuerySchema;
 use Psr\Messages\Middleware\ParsedBodyMiddleware;
 use Psr\Messages\Middleware\ParseQueryParamsMiddleware;
 use Psr\Messages\Schema\SchemaResolver;
+use Psr\Messages\Tests\Unit\Middleware\Fixtures\StubQuerySchema;
 use Psr\Messages\Tests\Unit\Schema\Fixtures\UpperSchema;
 
 final class ParseMiddlewareTest extends TestCase
@@ -74,7 +74,7 @@ final class ParseMiddlewareTest extends TestCase
     #[Test]
     public function query_middleware_stores_the_query_schema_as_a_request_attribute(): void
     {
-        $middleware = new ParseQueryParamsMiddleware(new SchemaResolver(JsonApiQuerySchema::class));
+        $middleware = new ParseQueryParamsMiddleware(new SchemaResolver(StubQuerySchema::class));
 
         $request = new ServerRequest('GET', 'https://api.example.com/posts')
             ->withQueryParams(['sort' => 'title', 'page' => ['number' => '2', 'size' => '5']]);
@@ -82,8 +82,8 @@ final class ParseMiddlewareTest extends TestCase
         $handler = new CapturingHandler();
         $middleware->process($request, $handler);
 
-        $query = $handler->captured()->getAttribute(JsonApiQuerySchema::class);
-        self::assertInstanceOf(JsonApiQuerySchema::class, $query);
+        $query = $handler->captured()->getAttribute(StubQuerySchema::class);
+        self::assertInstanceOf(StubQuerySchema::class, $query);
         self::assertSame(2, $query->page->number);
         self::assertSame(5, $query->page->size);
     }
@@ -91,14 +91,14 @@ final class ParseMiddlewareTest extends TestCase
     #[Test]
     public function query_middleware_passes_through_when_there_are_no_query_params(): void
     {
-        $middleware = new ParseQueryParamsMiddleware(new SchemaResolver(JsonApiQuerySchema::class));
+        $middleware = new ParseQueryParamsMiddleware(new SchemaResolver(StubQuerySchema::class));
 
         $request = new ServerRequest('GET', 'https://api.example.com/posts');
 
         $handler = new CapturingHandler();
         $middleware->process($request, $handler);
 
-        self::assertNull($handler->captured()->getAttribute(JsonApiQuerySchema::class));
+        self::assertNull($handler->captured()->getAttribute(StubQuerySchema::class));
     }
 }
 

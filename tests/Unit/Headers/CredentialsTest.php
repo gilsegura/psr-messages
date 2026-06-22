@@ -6,9 +6,12 @@ namespace Psr\Messages\Tests\Unit\Headers;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psr\Messages\Exception\UnexpectedStateException;
 use Psr\Messages\Headers\AuthorizationScheme;
 use Psr\Messages\Headers\BasicCredentials;
 use Psr\Messages\Headers\BearerToken;
+use Psr\Messages\Tests\Unit\Headers\Fixtures\BasicHeaders;
+use Psr\Messages\Tests\Unit\Headers\Fixtures\BearerHeaders;
 
 final class CredentialsTest extends TestCase
 {
@@ -43,5 +46,30 @@ final class CredentialsTest extends TestCase
     {
         self::assertSame('Basic', AuthorizationScheme::BASIC->value);
         self::assertSame('Bearer', AuthorizationScheme::BEARER->value);
+    }
+
+    #[Test]
+    public function a_bearer_headers_schema_parses_the_authorization_header(): void
+    {
+        $headers = BearerHeaders::deserialize(['authorization' => 'Bearer opaque-token']);
+
+        self::assertSame('opaque-token', $headers->bearer->token);
+    }
+
+    #[Test]
+    public function a_basic_headers_schema_decodes_username_and_password(): void
+    {
+        $headers = BasicHeaders::deserialize(['authorization' => 'Basic '.base64_encode('alice:s3cr3t')]);
+
+        self::assertSame('alice', $headers->credentials->username);
+        self::assertSame('s3cr3t', $headers->credentials->password);
+    }
+
+    #[Test]
+    public function a_bearer_headers_schema_rejects_a_mismatched_scheme(): void
+    {
+        $this->expectException(UnexpectedStateException::class);
+
+        BearerHeaders::deserialize(['authorization' => 'Basic '.base64_encode('alice:s3cr3t')]);
     }
 }

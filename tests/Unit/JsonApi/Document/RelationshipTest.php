@@ -52,4 +52,29 @@ final class RelationshipTest extends TestCase
 
         self::assertSame(['data' => []], $relationship->serialize());
     }
+
+    #[Test]
+    public function to_one_sets_its_identifier_with_a_with_method(): void
+    {
+        $relationship = new ToOneRelationship()
+            ->withIdentifier(new ResourceIdentifier(StubType::PERSON, 'p-1'));
+
+        self::assertSame(['data' => ['type' => 'people', 'id' => 'p-1']], $relationship->serialize());
+    }
+
+    #[Test]
+    public function to_many_appends_identifiers_with_a_with_method(): void
+    {
+        $relationship = new ToManyRelationship()
+            ->withIdentifier(new ResourceIdentifier(StubType::ARTICLE, '1'))
+            ->withIdentifier(new ResourceIdentifier(StubType::ARTICLE, '2'));
+
+        self::assertCount(2, $relationship->identifiers());
+        self::assertSame([
+            'data' => [
+                ['type' => 'articles', 'id' => '1'],
+                ['type' => 'articles', 'id' => '2'],
+            ],
+        ], $relationship->serialize());
+    }
 }

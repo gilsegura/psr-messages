@@ -30,18 +30,6 @@ final readonly class ResourceIdentifier implements HasResourceIdentifierInterfac
         $this->meta = $meta;
     }
 
-    #[\Override]
-    public function type(): ResourceTypeInterface
-    {
-        return $this->type;
-    }
-
-    #[\Override]
-    public function id(): string
-    {
-        return $this->id;
-    }
-
     /**
      * @return array<string, mixed>
      */
@@ -64,6 +52,18 @@ final readonly class ResourceIdentifier implements HasResourceIdentifierInterfac
     public static function deserialize(array $attributes): static
     {
         throw UnsupportedDeserializationException::for('A resource identifier');
+    }
+
+    #[\Override]
+    public function type(): ResourceTypeInterface
+    {
+        return $this->type;
+    }
+
+    #[\Override]
+    public function id(): string
+    {
+        return $this->id;
     }
 
     /**

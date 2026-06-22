@@ -6,25 +6,27 @@ namespace Psr\Messages\Tests\Unit\JsonApi\Query;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Psr\Messages\JsonApi\Query\Definition\Filters;
+use Psr\Messages\Tests\Unit\JsonApi\Query\Fixtures\StubFilters;
 
 final class FiltersTest extends TestCase
 {
     #[Test]
-    public function it_parses_filters_keyed_by_field(): void
+    public function it_parses_filter_field_value_pairs(): void
     {
-        $filters = Filters::deserialize(['filter' => ['status' => 'published', 'author' => 'a-1']]);
+        $filters = StubFilters::deserialize(['filter' => ['status' => 'active']]);
 
-        self::assertCount(2, $filters->filters);
-        self::assertSame('status', $filters->filters[0]->field);
-        self::assertSame('published', $filters->filters[0]->value);
+        self::assertSame('active', $filters->forField('status'));
+    }
+
+    #[Test]
+    public function it_returns_null_for_an_absent_filter(): void
+    {
+        self::assertNull(StubFilters::deserialize([])->forField('status'));
     }
 
     #[Test]
     public function it_is_empty_when_no_filter_is_given(): void
     {
-        $filters = Filters::deserialize([]);
-
-        self::assertSame([], $filters->filters);
+        self::assertTrue(StubFilters::deserialize([])->isEmpty());
     }
 }

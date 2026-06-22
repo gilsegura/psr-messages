@@ -11,7 +11,9 @@ use Psr\Messages\Link\Definition\Link;
 
 /**
  * A to-many JSON:API relationship: its linkage is a list of resource
- * identifiers (possibly empty). May carry optional links and meta.
+ * identifiers (possibly empty). The constructor takes only the identifiers;
+ * links and meta are added through immutable withXxx() methods, and identifiers
+ * can be appended one at a time with withIdentifier().
  */
 final readonly class ToManyRelationship implements RelationshipInterface, HasLinksInterface, HasMetaInterface
 {
@@ -65,6 +67,22 @@ final readonly class ToManyRelationship implements RelationshipInterface, HasLin
     public static function deserialize(array $attributes): static
     {
         throw UnsupportedDeserializationException::for('A to-many relationship');
+    }
+
+    /**
+     * @return ResourceIdentifier[]
+     */
+    public function identifiers(): array
+    {
+        return $this->identifiers;
+    }
+
+    /**
+     * Appends a resource identifier to the linkage, returning a new relationship.
+     */
+    public function withIdentifier(ResourceIdentifier $identifier): static
+    {
+        return new self([...$this->identifiers, $identifier], $this->links, $this->meta);
     }
 
     /**

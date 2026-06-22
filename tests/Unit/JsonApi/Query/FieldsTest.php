@@ -6,36 +6,50 @@ namespace Psr\Messages\Tests\Unit\JsonApi\Query;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Psr\Messages\Exception\UnexpectedStateException;
-use Psr\Messages\JsonApi\Query\Definition\Fields;
+use Psr\Messages\Tests\Unit\JsonApi\Query\Fixtures\StubFields;
+use Psr\Messages\Tests\Unit\JsonApi\Query\Fixtures\StubType;
 
 final class FieldsTest extends TestCase
 {
     #[Test]
-    public function it_parses_sparse_fieldsets_per_type(): void
+    public function it_parses_a_fieldset_per_type(): void
     {
-        $fields = Fields::deserialize(['fields' => ['articles' => 'title,body', 'people' => 'name']]);
+        $fields = StubFields::deserialize(['fields' => ['articles' => 'title,body']]);
 
-        self::assertCount(2, $fields->fields);
-        self::assertSame('articles', $fields->fields[0]->type);
-        self::assertSame(['title', 'body'], $fields->fields[0]->fields);
-        self::assertSame('people', $fields->fields[1]->type);
-        self::assertSame(['name'], $fields->fields[1]->fields);
+        $field = $fields->forType(StubType::ARTICLE);
+
+        self::assertNotNull($field);
+        self::assertSame(['title', 'body'], $field->fields);
+        self::assertTrue($field->has('title'));
+        self::assertFalse($field->has('summary'));
     }
 
     #[Test]
-    public function it_is_empty_when_no_fields_are_given(): void
+    public function it_returns_null_for_an_unconstrained_type(): void
     {
-        $fields = Fields::deserialize([]);
+        $fields = StubFields::deserialize(['fields' => ['articles' => 'title']]);
 
-        self::assertSame([], $fields->fields);
+        self::assertNull($fields->forType(StubType::PERSON));
+        self::assertFalse($fields->has(StubType::PERSON));
     }
 
     #[Test]
-    public function it_throws_when_fields_is_not_an_array(): void
+    public function it_applies_the_fieldset_keeping_only_requested_attributes(): void
     {
-        $this->expectException(UnexpectedStateException::class);
+        $fields = StubFields::deserialize(['fields' => ['articles' => 'title']]);
 
-        Fields::deserialize(['fields' => 'nope']);
+        $kept = $fields->apply(StubType::ARTICLE, ['title' => 'Hi', 'body' => 'X']);
+
+        self::assertSame(['title' => 'Hi'], $kept);
+    }
+
+    #[Test]
+    public function it_leaves_attributes_untouched_for_an_unconstrained_type(): void
+    {
+        $fields = StubFields::deserialize([]);
+
+        $attributes = ['title' => 'Hi', 'body' => 'X'];
+
+        self::assertSame($attributes, $fields->apply(StubType::ARTICLE, $attributes));
     }
 }

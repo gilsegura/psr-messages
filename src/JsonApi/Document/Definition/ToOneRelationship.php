@@ -11,7 +11,9 @@ use Psr\Messages\Link\Definition\Link;
 
 /**
  * A to-one JSON:API relationship: its linkage is a single resource identifier,
- * or null when the relationship is empty. May carry optional links and meta.
+ * or null when the relationship is empty. The constructor takes only the
+ * identifier; links and meta are added through immutable withXxx() methods, and
+ * the linkage can be set with withIdentifier().
  */
 final readonly class ToOneRelationship implements RelationshipInterface, HasLinksInterface, HasMetaInterface
 {
@@ -60,6 +62,19 @@ final readonly class ToOneRelationship implements RelationshipInterface, HasLink
     public static function deserialize(array $attributes): static
     {
         throw UnsupportedDeserializationException::for('A to-one relationship');
+    }
+
+    public function identifier(): ?ResourceIdentifier
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * Sets the linkage identifier, returning a new relationship.
+     */
+    public function withIdentifier(ResourceIdentifier $identifier): static
+    {
+        return new self($identifier, $this->links, $this->meta);
     }
 
     /**

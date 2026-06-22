@@ -30,11 +30,20 @@ final class PageTest extends TestCase
     }
 
     #[Test]
-    public function it_throws_when_page_is_not_an_array(): void
+    public function it_defaults_when_no_page_parameter_is_given(): void
     {
-        $this->expectException(UnexpectedStateException::class);
+        $page = Page::deserialize([]);
 
-        Page::deserialize(['page' => 'nope']);
+        self::assertSame(1, $page->number);
+        self::assertSame(20, $page->size);
+    }
+
+    #[Test]
+    public function it_derives_the_zero_based_offset(): void
+    {
+        $page = Page::deserialize(['page' => ['number' => '3', 'size' => '20']]);
+
+        self::assertSame(40, $page->offset());
     }
 
     #[Test]

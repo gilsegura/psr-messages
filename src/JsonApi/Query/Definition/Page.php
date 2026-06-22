@@ -22,19 +22,28 @@ final readonly class Page implements SerializableInterface
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * The zero-based offset of the first record on this page, derived from the
+     * page number and size, e.g. page 3 of size 20 starts at offset 40. Keeps the
+     * offset arithmetic in the value object that owns number and size.
+     */
+    public function offset(): int
+    {
+        return ($this->number - 1) * $this->size;
+    }
+
+    /**
+     * @param array<array-key, mixed> $attributes
      */
     #[\Override]
     public static function deserialize(array $attributes): static
     {
-        if (
-            !isset($attributes['page'])
-            || !\is_array($attributes['page'])
-        ) {
+        $page = $attributes['page'] ?? [];
+
+        if (!\is_array($page)) {
             throw UnexpectedStateException::reason('the page query parameter must be an array.');
         }
 
-        ['number' => $number, 'size' => $size] = $attributes['page'] + ['number' => '1', 'size' => '20'];
+        ['number' => $number, 'size' => $size] = $page + ['number' => '1', 'size' => '20'];
 
         if (
             !\is_numeric($number)

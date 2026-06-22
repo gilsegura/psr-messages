@@ -10,4 +10,10 @@ enum StubType: string implements ResourceTypeInterface
 {
     case ARTICLE = 'articles';
     case PERSON = 'people';
+
+    #[\Override]
+    public function equals(ResourceTypeInterface $type): bool
+    {
+        return $this === $type;
+    }
 }

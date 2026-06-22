@@ -11,12 +11,26 @@ use Psr\Messages\Link\Definition\Link;
 use Serializer\SerializableInterface;
 
 /**
- * A concrete JSON:API resource object carrying type, id, attributes, and
- * optionally relationships, links and meta. Build it directly, or wrap it (e.g.
- * an anonymous class in a handler) to expose domain data as a resource.
+ * A concrete JSON:API resource object carrying type, id and attributes, and
+ * optionally relationships, links and meta. The constructor takes only the
+ * minimal identity ({type, id, attributes}); relationships, links and meta are
+ * added through immutable withXxx() methods, so a resource is built up one
+ * concern at a time. Build it directly, or wrap it to expose domain data.
  */
 final readonly class ResourceObject implements ResourceInterface, HasOneRelationshipInterface, HasManyRelationshipsInterface, HasLinksInterface, HasMetaInterface
 {
+    /** @var array<string, ToOneRelationship> */
+    private array $oneRelationships;
+
+    /** @var array<string, ToManyRelationship> */
+    private array $manyRelationships;
+
+    /** @var Link[] */
+    private array $links;
+
+    /** @var array<string, mixed> */
+    private array $meta;
+
     /**
      * @param SerializableInterface<array<string, mixed>> $attributes
      * @param array<string, ToOneRelationship>            $oneRelationships
@@ -28,11 +42,15 @@ final readonly class ResourceObject implements ResourceInterface, HasOneRelation
         private ResourceTypeInterface $type,
         private string $id,
         private SerializableInterface $attributes,
-        private array $oneRelationships = [],
-        private array $manyRelationships = [],
-        private array $links = [],
-        private array $meta = [],
+        array $oneRelationships = [],
+        array $manyRelationships = [],
+        array $links = [],
+        array $meta = [],
     ) {
+        $this->oneRelationships = $oneRelationships;
+        $this->manyRelationships = $manyRelationships;
+        $this->links = $links;
+        $this->meta = $meta;
     }
 
     /**
@@ -116,12 +134,44 @@ final readonly class ResourceObject implements ResourceInterface, HasOneRelation
     }
 
     /**
+     * Adds a to-one relationship under the given name, returning a new resource.
+     */
+    public function withOneRelationship(RelationshipNameInterface $name, ToOneRelationship $relationship): static
+    {
+        return new self(
+            $this->type,
+            $this->id,
+            $this->attributes,
+            [(string) $name->value => $relationship] + $this->oneRelationships,
+            $this->manyRelationships,
+            $this->links,
+            $this->meta,
+        );
+    }
+
+    /**
      * @return array<string, ToManyRelationship>
      */
     #[\Override]
     public function manyRelationships(): array
     {
         return $this->manyRelationships;
+    }
+
+    /**
+     * Adds a to-many relationship under the given name, returning a new resource.
+     */
+    public function withManyRelationship(RelationshipNameInterface $name, ToManyRelationship $relationship): static
+    {
+        return new self(
+            $this->type,
+            $this->id,
+            $this->attributes,
+            $this->oneRelationships,
+            [(string) $name->value => $relationship] + $this->manyRelationships,
+            $this->links,
+            $this->meta,
+        );
     }
 
     /**

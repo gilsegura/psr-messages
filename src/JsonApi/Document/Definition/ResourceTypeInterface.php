@@ -11,4 +11,5 @@ namespace Psr\Messages\JsonApi\Document\Definition;
  */
 interface ResourceTypeInterface extends \BackedEnum
 {
+    public function equals(ResourceTypeInterface $type): bool;
 }

@@ -10,7 +10,7 @@ parameters:
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         # --- src: the response factories pass our documents (valid
-        # SerializableInterface<array<string, mixed>>) to psr-server's ResponseFactory, whose
+        # SerializableInterface<array<array-key, mixed>>) to psr-server's ResponseFactory, whose
         # TAttributes template is invariant. Cross-package variance limitation, not a real error.
         -
             identifier: argument.type
