@@ -6,11 +6,13 @@ namespace Psr\Messages\JsonApi\Query\Definition;
 
 use Psr\Messages\Exception\UnsupportedSerializationException;
 use Psr\Messages\Schema\SchemaInterface;
+use Psr\Messages\Schema\SingleShapeTrait;
 
 /**
  * Base for an endpoint's query schema. It carries the fixed machinery every
  * JSON:API query has — a query is input only, so serialize() always throws, and
- * by default a single query shape applies to a request, so supports() matches.
+ * by default a single query shape applies to a request, so supports() matches
+ * (SingleShapeTrait).
  *
  * Concrete query schemas live in the consuming library: each endpoint extends
  * this and, in deserialize(), composes only the query value objects it allows
@@ -25,17 +27,7 @@ use Psr\Messages\Schema\SchemaInterface;
  */
 abstract readonly class AbstractQuerySchema implements SchemaInterface
 {
-    /**
-     * One query shape applies per request, so by default every request matches.
-     * Override when an endpoint distinguishes several query shapes.
-     *
-     * @param array<array-key, mixed> $data
-     */
-    #[\Override]
-    public static function supports(array $data): bool
-    {
-        return true;
-    }
+    use SingleShapeTrait;
 
     /**
      * @param array<array-key, mixed> $attributes

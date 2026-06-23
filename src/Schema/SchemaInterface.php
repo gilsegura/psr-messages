@@ -25,7 +25,10 @@ use Serializer\SerializableInterface;
 interface SchemaInterface extends SerializableInterface
 {
     /**
-     * Whether this schema applies to the given raw input data.
+     * Whether this schema applies to the given input data. The data has already
+     * been validated against the endpoint's JSON Schema, so this only
+     * discriminates between the shapes an endpoint accepts; it never re-validates
+     * integrity. It receives the same typed data as deserialize().
      *
      * @param TAttributes $data
      */

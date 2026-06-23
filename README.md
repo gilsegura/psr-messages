@@ -56,6 +56,11 @@ A schema turns raw input into a typed object:
 - **`SchemaResolverInterface` / `SchemaResolver`** — pick the first schema whose
   `supports()` matches the validated input, raising `UnresolvedSchemaException`
   when none do.
+- **`SingleShapeTrait`** — provides `supports()` returning `true`, for the common
+  case of an endpoint with a single shape, removing the repeated guard. A
+  single-shape schema uses it and writes only `deserialize()` (plus the input-only
+  `serialize()`); a discriminating schema does not use it and writes its own
+  `supports()`.
 
 A request body that accepts several shapes (e.g. create vs update) exposes one
 schema per shape; the resolver chooses. Each schema reads its fields with
