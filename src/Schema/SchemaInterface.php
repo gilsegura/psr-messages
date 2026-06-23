@@ -27,7 +27,7 @@ interface SchemaInterface extends SerializableInterface
     /**
      * Whether this schema applies to the given raw input data.
      *
-     * @param array<array-key, mixed> $data
+     * @param TAttributes $data
      */
     public static function supports(array $data): bool;
 }

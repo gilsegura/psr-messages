@@ -48,10 +48,14 @@ For every request the toolkit runs **validation first, parsing second**:
 A schema turns raw input into a typed object:
 
 - **`SchemaInterface`** — a serializable type with a static `supports(array $data)`
-  guard, so the right schema is chosen for the incoming data and deserialized
-  into a typed object. Input only: `serialize()` is unsupported.
+  guard that discriminates between the shapes an endpoint accepts, so the right
+  schema is chosen and deserialized into a typed object. `supports()` receives the
+  same already-validated, typed data as `deserialize()` (validation happened in
+  step 1), so it only discriminates — it never re-checks integrity. Input only:
+  `serialize()` is unsupported.
 - **`SchemaResolverInterface` / `SchemaResolver`** — pick the first schema whose
-  `supports()` matches a payload, raising `UnresolvedSchemaException` when none do.
+  `supports()` matches the validated input, raising `UnresolvedSchemaException`
+  when none do.
 
 A request body that accepts several shapes (e.g. create vs update) exposes one
 schema per shape; the resolver chooses. Each schema reads its fields with
@@ -239,4 +243,4 @@ The plain-JSON flow is identical with the `Json` pieces: `JsonParser`,
 
 ## License
 
-MIT.
+MIT. See [LICENSE](LICENSE).

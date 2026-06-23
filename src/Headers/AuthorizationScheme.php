@@ -8,4 +8,9 @@ enum AuthorizationScheme: string
 {
     case BEARER = 'Bearer';
     case BASIC = 'Basic';
+
+    public function equals(AuthorizationScheme $scheme): bool
+    {
+        return $this === $scheme;
+    }
 }
