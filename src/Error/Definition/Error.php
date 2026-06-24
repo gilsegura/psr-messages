@@ -26,8 +26,8 @@ final readonly class Error implements ErrorInterface, HasErrorSourceInterface, H
         private string $title,
         private string $detail,
         private ?Source $source = null,
-        private array $links = [],
-        private array $meta = [],
+        public array $links = [],
+        public array $meta = [],
     ) {
     }
 
@@ -52,8 +52,8 @@ final readonly class Error implements ErrorInterface, HasErrorSourceInterface, H
             $throwable->title(),
             $throwable->detail(),
             $throwable instanceof HasErrorSourceInterface ? $throwable->source() : null,
-            $throwable instanceof HasLinksInterface ? $throwable->links() : [],
-            $throwable instanceof HasMetaInterface ? $throwable->meta() : [],
+            $throwable instanceof HasLinksInterface ? $throwable->links : [],
+            $throwable instanceof HasMetaInterface ? $throwable->meta : [],
         );
     }
 
@@ -74,9 +74,6 @@ final readonly class Error implements ErrorInterface, HasErrorSourceInterface, H
         return new self($this->errorCode, $this->title, $this->detail, $this->source, $links, $this->meta);
     }
 
-    /**
-     * @param array<string, mixed> $meta
-     */
     #[\Override]
     public function withMeta(array $meta): static
     {
@@ -110,23 +107,5 @@ final readonly class Error implements ErrorInterface, HasErrorSourceInterface, H
     public function hasSource(): bool
     {
         return $this->source instanceof Source;
-    }
-
-    /**
-     * @return Link[]
-     */
-    #[\Override]
-    public function links(): array
-    {
-        return $this->links;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    #[\Override]
-    public function meta(): array
-    {
-        return $this->meta;
     }
 }

@@ -72,7 +72,7 @@ final class ErrorTest extends TestCase
 
         $withMeta = $error->withMeta(['retryable' => false]);
 
-        self::assertSame([], $error->meta());
-        self::assertSame(['retryable' => false], $withMeta->meta());
+        self::assertSame([], $error->meta);
+        self::assertSame(['retryable' => false], $withMeta->meta);
     }
 }

@@ -84,13 +84,17 @@ Three middlewares type the parts of a request, after validation:
 
 `Psr\Messages\JsonApi\Document` builds the response side. Every definition takes
 the **minimal identity** in its constructor and is composed further through
-immutable `withXxx()` methods, so a document is assembled one concern at a time:
+immutable `withXxx()` methods, so a document is assembled one concern at a time.
+State is exposed directly as `readonly` properties — the `Has*` interfaces
+declare it with property hooks (`public T $x { get; }`), not getters — while
+`withXxx()` methods derive new instances. The rule across the package: read state
+through a property, derive copies through a method.
 
 - **`ResourceObject`** — `new ResourceObject($type, $id, $attributes)`, then
   `withOneRelationship()`, `withManyRelationship()`, `withLinks()`, `withMeta()`.
 - **`ResourceIdentifier`** — the `{type, id}` linkage; `withMeta()` for meta.
-- **`ToOneRelationship` / `ToManyRelationship`** — linkage plus optional links
-  and meta; `withIdentifier()`, `withLinks()`, `withMeta()`.
+- **`ToOneRelationship` / `ToManyRelationship`** — linkage (a single identifier
+  or a list) plus optional links and meta; `withLinks()`, `withMeta()`.
 - **`SingleResourceDocument` / `ResourceCollectionDocument`** — primary data plus
   `withLinks()` (including pagination), `withMeta()` and `withIncluded()` for
   compound documents.

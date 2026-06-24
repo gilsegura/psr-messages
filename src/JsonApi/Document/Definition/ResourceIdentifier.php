@@ -17,22 +17,19 @@ use Serializer\SerializableInterface;
 final readonly class ResourceIdentifier implements HasResourceIdentifierInterface, HasMetaInterface, SerializableInterface
 {
     /** @var array<string, mixed> */
-    private array $meta;
+    public array $meta;
 
     /**
      * @param array<string, mixed> $meta
      */
     public function __construct(
-        private ResourceTypeInterface $type,
-        private string $id,
+        public ResourceTypeInterface $type,
+        public string $id,
         array $meta = [],
     ) {
         $this->meta = $meta;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     #[\Override]
     public function serialize(): array
     {
@@ -54,30 +51,6 @@ final readonly class ResourceIdentifier implements HasResourceIdentifierInterfac
         throw UnsupportedDeserializationException::for('A resource identifier');
     }
 
-    #[\Override]
-    public function type(): ResourceTypeInterface
-    {
-        return $this->type;
-    }
-
-    #[\Override]
-    public function id(): string
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    #[\Override]
-    public function meta(): array
-    {
-        return $this->meta;
-    }
-
-    /**
-     * @param array<string, mixed> $meta
-     */
     #[\Override]
     public function withMeta(array $meta): static
     {

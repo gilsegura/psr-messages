@@ -13,9 +13,9 @@ namespace Psr\Messages\JsonApi\Document\Definition;
 interface HasIncludedInterface
 {
     /**
-     * @return ResourceInterface[]
+     * @var ResourceInterface[]
      */
-    public function included(): array;
+    public array $included { get; }
 
     public function withIncluded(ResourceInterface ...$included): static;
 }

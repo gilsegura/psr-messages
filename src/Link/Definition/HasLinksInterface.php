@@ -10,9 +10,9 @@ namespace Psr\Messages\Link\Definition;
 interface HasLinksInterface
 {
     /**
-     * @return Link[]
+     * @var Link[]
      */
-    public function links(): array;
+    public array $links { get; }
 
     public function withLinks(Link ...$links): static;
 }

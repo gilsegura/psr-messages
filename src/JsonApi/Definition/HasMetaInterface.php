@@ -10,9 +10,9 @@ namespace Psr\Messages\JsonApi\Definition;
 interface HasMetaInterface
 {
     /**
-     * @return array<string, mixed>
+     * @var array<string, mixed>
      */
-    public function meta(): array;
+    public array $meta { get; }
 
     /**
      * @param array<string, mixed> $meta

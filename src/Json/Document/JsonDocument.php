@@ -21,9 +21,6 @@ final readonly class JsonDocument extends Document
     ) {
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     #[\Override]
     public function serialize(): array
     {

@@ -10,7 +10,7 @@ namespace Psr\Messages\JsonApi\Document\Definition;
  */
 interface HasResourceIdentifierInterface
 {
-    public function type(): ResourceTypeInterface;
+    public ResourceTypeInterface $type { get; }
 
-    public function id(): string;
+    public string $id { get; }
 }

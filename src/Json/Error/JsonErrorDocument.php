@@ -13,9 +13,6 @@ use Psr\Messages\Error\ErrorDocument;
  */
 final readonly class JsonErrorDocument extends ErrorDocument
 {
-    /**
-     * @return array<string, mixed>
-     */
     #[\Override]
     public function serialize(): array
     {

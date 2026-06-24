@@ -15,9 +15,6 @@ enum SourceType: string implements SourceTypeInterface
     case PARAMETER = 'parameter';
     case HEADER = 'header';
 
-    /**
-     * @return non-empty-string
-     */
     #[\Override]
     public function separator(): string
     {

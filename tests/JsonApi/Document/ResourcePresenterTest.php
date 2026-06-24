@@ -72,7 +72,7 @@ final class ResourcePresenterTest extends TestCase
     {
         $resource = $this->presenter->present($this->article, StubFields::deserialize([]));
 
-        self::assertSame(StubType::ARTICLE, $resource->type());
-        self::assertSame('1', $resource->id());
+        self::assertSame(StubType::ARTICLE, $resource->type);
+        self::assertSame('1', $resource->id);
     }
 }

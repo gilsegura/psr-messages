@@ -24,9 +24,6 @@ final readonly class StubArticle implements SerializableInterface
     ) {
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     #[\Override]
     public function serialize(): array
     {

@@ -19,9 +19,6 @@ use Psr\Messages\Link\Definition\Link;
  */
 final readonly class JsonApiErrorDocument extends ErrorDocument
 {
-    /**
-     * @return array<string, mixed>
-     */
     #[\Override]
     public function serialize(): array
     {
@@ -47,12 +44,12 @@ final readonly class JsonApiErrorDocument extends ErrorDocument
             $member['source'] = [$source->type->value => $source->path];
         }
 
-        if ($error instanceof HasLinksInterface && [] !== $error->links()) {
-            $member['links'] = Link::toArray($error->links());
+        if ($error instanceof HasLinksInterface && [] !== $error->links) {
+            $member['links'] = Link::toArray($error->links);
         }
 
-        if ($error instanceof HasMetaInterface && [] !== $error->meta()) {
-            $member['meta'] = $error->meta();
+        if ($error instanceof HasMetaInterface && [] !== $error->meta) {
+            $member['meta'] = $error->meta;
         }
 
         return $member;

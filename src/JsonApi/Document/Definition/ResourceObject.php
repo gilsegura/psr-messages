@@ -16,20 +16,23 @@ use Serializer\SerializableInterface;
  * minimal identity ({type, id, attributes}); relationships, links and meta are
  * added through immutable withXxx() methods, so a resource is built up one
  * concern at a time. Build it directly, or wrap it to expose domain data.
+ *
+ * State is exposed as readonly properties (the interface contracts declare them
+ * as `{ get; }`); withXxx() derive new instances.
  */
-final readonly class ResourceObject implements ResourceInterface, HasOneRelationshipInterface, HasManyRelationshipsInterface, HasLinksInterface, HasMetaInterface
+final readonly class ResourceObject implements ResourceInterface, HasLinksInterface, HasMetaInterface
 {
     /** @var array<string, ToOneRelationship> */
-    private array $oneRelationships;
+    public array $oneRelationships;
 
     /** @var array<string, ToManyRelationship> */
-    private array $manyRelationships;
+    public array $manyRelationships;
 
     /** @var Link[] */
-    private array $links;
+    public array $links;
 
     /** @var array<string, mixed> */
-    private array $meta;
+    public array $meta;
 
     /**
      * @param SerializableInterface<array<string, mixed>> $attributes
@@ -39,9 +42,9 @@ final readonly class ResourceObject implements ResourceInterface, HasOneRelation
      * @param array<string, mixed>                        $meta
      */
     public function __construct(
-        private ResourceTypeInterface $type,
-        private string $id,
-        private SerializableInterface $attributes,
+        public ResourceTypeInterface $type,
+        public string $id,
+        public SerializableInterface $attributes,
         array $oneRelationships = [],
         array $manyRelationships = [],
         array $links = [],
@@ -53,9 +56,6 @@ final readonly class ResourceObject implements ResourceInterface, HasOneRelation
         $this->meta = $meta;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     #[\Override]
     public function serialize(): array
     {
@@ -94,45 +94,6 @@ final readonly class ResourceObject implements ResourceInterface, HasOneRelation
         throw UnsupportedDeserializationException::for('A resource object');
     }
 
-    #[\Override]
-    public function type(): ResourceTypeInterface
-    {
-        return $this->type;
-    }
-
-    #[\Override]
-    public function id(): string
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return SerializableInterface<array<string, mixed>>
-     */
-    #[\Override]
-    public function attributes(): SerializableInterface
-    {
-        return $this->attributes;
-    }
-
-    /**
-     * @param SerializableInterface<array<string, mixed>> $attributes
-     */
-    #[\Override]
-    public function withAttributes(SerializableInterface $attributes): static
-    {
-        return new self($this->type, $this->id, $attributes, $this->oneRelationships, $this->manyRelationships, $this->links, $this->meta);
-    }
-
-    /**
-     * @return array<string, ToOneRelationship>
-     */
-    #[\Override]
-    public function oneRelationships(): array
-    {
-        return $this->oneRelationships;
-    }
-
     /**
      * Adds a to-one relationship under the given name, returning a new resource.
      */
@@ -147,15 +108,6 @@ final readonly class ResourceObject implements ResourceInterface, HasOneRelation
             $this->links,
             $this->meta,
         );
-    }
-
-    /**
-     * @return array<string, ToManyRelationship>
-     */
-    #[\Override]
-    public function manyRelationships(): array
-    {
-        return $this->manyRelationships;
     }
 
     /**
@@ -174,33 +126,12 @@ final readonly class ResourceObject implements ResourceInterface, HasOneRelation
         );
     }
 
-    /**
-     * @return Link[]
-     */
-    #[\Override]
-    public function links(): array
-    {
-        return $this->links;
-    }
-
     #[\Override]
     public function withLinks(Link ...$links): static
     {
         return new self($this->type, $this->id, $this->attributes, $this->oneRelationships, $this->manyRelationships, $links, $this->meta);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    #[\Override]
-    public function meta(): array
-    {
-        return $this->meta;
-    }
-
-    /**
-     * @param array<string, mixed> $meta
-     */
     #[\Override]
     public function withMeta(array $meta): static
     {

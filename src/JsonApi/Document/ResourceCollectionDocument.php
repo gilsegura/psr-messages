@@ -13,22 +13,22 @@ use Psr\Messages\Link\Definition\HasLinksInterface;
 use Psr\Messages\Link\Definition\Link;
 
 /**
- * A JSON:API document whose primary data is a collection of resource objects.
- * Carries optional top-level links (including pagination) and meta.
+ * A JSON:API document whose primary data is a list of resource objects. Carries
+ * optional top-level links (including pagination), meta and included resources.
  */
 final readonly class ResourceCollectionDocument extends Document implements HasLinksInterface, HasMetaInterface, HasIncludedInterface
 {
     /** @var ResourceInterface[] */
-    private array $resources;
+    public array $resources;
 
     /** @var Link[] */
-    private array $links;
+    public array $links;
 
     /** @var array<string, mixed> */
-    private array $meta;
+    public array $meta;
 
     /** @var ResourceInterface[] */
-    private array $included;
+    public array $included;
 
     /**
      * @param ResourceInterface[]  $resources
@@ -44,9 +44,6 @@ final readonly class ResourceCollectionDocument extends Document implements HasL
         $this->included = $included;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     #[\Override]
     public function serialize(): array
     {
@@ -69,46 +66,16 @@ final readonly class ResourceCollectionDocument extends Document implements HasL
         return $document;
     }
 
-    /**
-     * @return Link[]
-     */
-    #[\Override]
-    public function links(): array
-    {
-        return $this->links;
-    }
-
     #[\Override]
     public function withLinks(Link ...$links): static
     {
         return new self($this->resources, $links, $this->meta, $this->included);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    #[\Override]
-    public function meta(): array
-    {
-        return $this->meta;
-    }
-
-    /**
-     * @param array<string, mixed> $meta
-     */
     #[\Override]
     public function withMeta(array $meta): static
     {
         return new self($this->resources, $this->links, $meta, $this->included);
-    }
-
-    /**
-     * @return ResourceInterface[]
-     */
-    #[\Override]
-    public function included(): array
-    {
-        return $this->included;
     }
 
     #[\Override]

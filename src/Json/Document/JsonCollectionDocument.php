@@ -28,9 +28,6 @@ final readonly class JsonCollectionDocument implements SerializableInterface
         $this->payloads = $payloads;
     }
 
-    /**
-     * @return array<array<string, mixed>>
-     */
     #[\Override]
     public function serialize(): array
     {

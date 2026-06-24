@@ -19,9 +19,6 @@ final readonly class StubAttributes implements SerializableInterface
     {
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     #[\Override]
     public function serialize(): array
     {
