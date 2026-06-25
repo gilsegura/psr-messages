@@ -37,7 +37,7 @@ final class DocumentTest extends TestCase
         $document = new SingleResourceDocument(
             new ResourceObject(StubType::ARTICLE, '1', new StubAttributes([])),
         )
-            ->withLinks(new Link(LinkType::SELF, new Href('https://api.example.com/articles/1')))
+            ->withLinks(new Link(LinkType::SELF, Href::fromAbsolute('https://api.example.com/articles/1')))
             ->withMeta(['count' => 1])
             ->withIncluded(new ResourceObject(StubType::PERSON, 'p-1', new StubAttributes(['name' => 'Ada'])));
 
@@ -69,8 +69,8 @@ final class DocumentTest extends TestCase
     {
         $document = new ResourceCollectionDocument([])
             ->withLinks(
-                new Link(LinkType::FIRST, new Href('https://api.example.com/articles?page=1')),
-                new Link(LinkType::NEXT, new Href('https://api.example.com/articles?page=2')),
+                new Link(LinkType::FIRST, Href::fromAbsolute('https://api.example.com/articles?page=1')),
+                new Link(LinkType::NEXT, Href::fromAbsolute('https://api.example.com/articles?page=2')),
             )
             ->withMeta(['total' => 100]);
 

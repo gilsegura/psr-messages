@@ -28,10 +28,10 @@ final class PresenterTest extends TestCase
     {
         $presenter = new StubJsonPresenter();
 
-        $document = new JsonCollectionDocument([
+        $document = new JsonCollectionDocument(
             $presenter->present(new StubReadModel('1', 'Ada')),
             $presenter->present(new StubReadModel('2', 'Linus')),
-        ]);
+        );
 
         self::assertCount(2, $document->serialize());
     }

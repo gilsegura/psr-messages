@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Psr\Messages\JsonApi\Query\Definition;
 
 use Psr\Messages\Exception\UnsupportedSerializationException;
+use Psr\Messages\JsonApi\Document\Definition\FieldsetInterface;
 use Psr\Messages\JsonApi\Document\Definition\ResourceTypeInterface;
 use Psr\Messages\Support\PathNavigator;
 use Serializer\SerializableInterface;
@@ -19,7 +20,7 @@ use Serializer\SerializableInterface;
  *
  * @implements SerializableInterface<array{fields?: array<string, string>}>
  */
-abstract readonly class AbstractFields implements SerializableInterface
+abstract readonly class AbstractFields implements FieldsetInterface, SerializableInterface
 {
     /** @var Field[] */
     public array $fields;
@@ -44,29 +45,31 @@ abstract readonly class AbstractFields implements SerializableInterface
     /**
      * Whether a fieldset was requested for the given type.
      */
+    #[\Override]
     final public function has(ResourceTypeInterface $type): bool
     {
         return $this->forType($type) instanceof Field;
     }
 
     /**
-     * Applies the fieldset for a type to a serialized attributes map: keeps only
-     * the requested fields, or returns the attributes unchanged when the type was
-     * not constrained.
+     * Applies the fieldset for a type to an attributes payload: keeps only the
+     * requested fields, or returns the attributes unchanged when the type was not
+     * constrained.
      *
-     * @param array<string, mixed> $attributes
+     * @param SerializableInterface<array<string, mixed>> $attributes
      *
      * @return array<string, mixed>
      */
-    final public function apply(ResourceTypeInterface $type, array $attributes): array
+    #[\Override]
+    final public function apply(ResourceTypeInterface $type, SerializableInterface $attributes): array
     {
         $field = $this->forType($type);
 
         if (!$field instanceof Field) {
-            return $attributes;
+            return $attributes->serialize();
         }
 
-        return array_intersect_key($attributes, array_flip($field->fields));
+        return $field->keep($attributes->serialize());
     }
 
     /**

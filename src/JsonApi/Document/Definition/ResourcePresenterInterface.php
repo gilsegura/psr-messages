@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Psr\Messages\JsonApi\Document\Definition;
 
-use Psr\Messages\JsonApi\Query\Definition\AbstractFields;
 use Serializer\SerializableInterface;
 
 /**
@@ -27,5 +26,5 @@ interface ResourcePresenterInterface
      * @param TModel                               $model
      * @param array<string, RelationshipInterface> $relationships
      */
-    public function present(SerializableInterface $model, AbstractFields $fields, array $relationships = []): ResourceInterface;
+    public function present(SerializableInterface $model, FieldsetInterface $fields, array $relationships = []): ResourceInterface;
 }

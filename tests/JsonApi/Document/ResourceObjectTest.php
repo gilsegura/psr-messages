@@ -14,6 +14,7 @@ use Psr\Messages\Link\Definition\Href;
 use Psr\Messages\Link\Definition\Link;
 use Psr\Messages\Link\Definition\LinkType;
 use Psr\Messages\Tests\JsonApi\Document\Fixtures\StubAttributes;
+use Psr\Messages\Tests\JsonApi\Document\Fixtures\StubFields;
 use Psr\Messages\Tests\JsonApi\Document\Fixtures\StubRelationship;
 use Psr\Messages\Tests\JsonApi\Document\Fixtures\StubType;
 
@@ -40,7 +41,7 @@ final class ResourceObjectTest extends TestCase
             new StubAttributes(['title' => 'Hello']),
             ['author' => new ToOneRelationship(new ResourceIdentifier(StubType::PERSON, 'p-1'))],
             ['tags' => new ToManyRelationship([new ResourceIdentifier(StubType::ARTICLE, 't-1')])],
-            [new Link(LinkType::SELF, new Href('https://api.example.com/articles/1'))],
+            [new Link(LinkType::SELF, Href::fromAbsolute('https://api.example.com/articles/1'))],
             ['views' => 10],
         );
 
@@ -93,12 +94,30 @@ final class ResourceObjectTest extends TestCase
     public function it_adds_links_and_meta_with_with_methods(): void
     {
         $resource = new ResourceObject(StubType::ARTICLE, '1', new StubAttributes([]))
-            ->withLinks(new Link(LinkType::SELF, new Href('https://api.example.com/articles/1')))
+            ->withLinks(new Link(LinkType::SELF, Href::fromAbsolute('https://api.example.com/articles/1')))
             ->withMeta(['views' => 10]);
 
         $serialized = $resource->serialize();
 
         self::assertSame('https://api.example.com/articles/1', $serialized['links']['self']);
         self::assertSame(['views' => 10], $serialized['meta']);
+    }
+
+    #[Test]
+    public function it_trims_attributes_to_the_attached_fieldset(): void
+    {
+        $resource = new ResourceObject(StubType::ARTICLE, '1', new StubAttributes(['title' => 'Hello', 'body' => 'World']))
+            ->withFieldset(StubFields::deserialize(['fields' => ['articles' => 'title']]));
+
+        self::assertSame(['title' => 'Hello'], $resource->serialize()['attributes']);
+    }
+
+    #[Test]
+    public function it_keeps_all_attributes_when_the_fieldset_does_not_constrain_the_type(): void
+    {
+        $resource = new ResourceObject(StubType::ARTICLE, '1', new StubAttributes(['title' => 'Hello', 'body' => 'World']))
+            ->withFieldset(StubFields::deserialize([]));
+
+        self::assertSame(['title' => 'Hello', 'body' => 'World'], $resource->serialize()['attributes']);
     }
 }

@@ -15,11 +15,15 @@ final readonly class Field
     /** @var string[] */
     public array $fields;
 
+    /** @var array<string, true> the field names as a lookup, built once for reuse */
+    private array $lookup;
+
     public function __construct(
         public ResourceTypeInterface $type,
         string ...$fields,
     ) {
         $this->fields = $fields;
+        $this->lookup = array_fill_keys($fields, true);
     }
 
     /**
@@ -27,6 +31,20 @@ final readonly class Field
      */
     public function has(string $field): bool
     {
-        return \in_array($field, $this->fields, true);
+        return isset($this->lookup[$field]);
+    }
+
+    /**
+     * Keeps only the requested fields from an attributes map. The field lookup is
+     * built once on construction, so applying the same fieldset across a whole
+     * collection does not re-flip the field list per resource.
+     *
+     * @param array<string, mixed> $attributes
+     *
+     * @return array<string, mixed>
+     */
+    public function keep(array $attributes): array
+    {
+        return array_intersect_key($attributes, $this->lookup);
     }
 }

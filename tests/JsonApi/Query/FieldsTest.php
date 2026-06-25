@@ -6,6 +6,7 @@ namespace Psr\Messages\Tests\JsonApi\Query;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psr\Messages\Tests\JsonApi\Document\Fixtures\StubAttributes;
 use Psr\Messages\Tests\JsonApi\Query\Fixtures\StubFields;
 use Psr\Messages\Tests\JsonApi\Query\Fixtures\StubType;
 
@@ -38,7 +39,7 @@ final class FieldsTest extends TestCase
     {
         $fields = StubFields::deserialize(['fields' => ['articles' => 'title']]);
 
-        $kept = $fields->apply(StubType::ARTICLE, ['title' => 'Hi', 'body' => 'X']);
+        $kept = $fields->apply(StubType::ARTICLE, new StubAttributes(['title' => 'Hi', 'body' => 'X']));
 
         self::assertSame(['title' => 'Hi'], $kept);
     }
@@ -50,6 +51,6 @@ final class FieldsTest extends TestCase
 
         $attributes = ['title' => 'Hi', 'body' => 'X'];
 
-        self::assertSame($attributes, $fields->apply(StubType::ARTICLE, $attributes));
+        self::assertSame($attributes, $fields->apply(StubType::ARTICLE, new StubAttributes($attributes)));
     }
 }

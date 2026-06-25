@@ -14,10 +14,10 @@ final class CollectionDocumentTest extends TestCase
     #[Test]
     public function it_serializes_a_list_of_payloads(): void
     {
-        $document = new JsonCollectionDocument([
+        $document = new JsonCollectionDocument(
             new StubReadModel('1', 'Ada'),
             new StubReadModel('2', 'Linus'),
-        ]);
+        );
 
         self::assertSame([
             ['id' => '1', 'name' => 'Ada'],
@@ -28,6 +28,6 @@ final class CollectionDocumentTest extends TestCase
     #[Test]
     public function it_serializes_an_empty_collection_as_an_empty_list(): void
     {
-        self::assertSame([], new JsonCollectionDocument([])->serialize());
+        self::assertSame([], new JsonCollectionDocument()->serialize());
     }
 }

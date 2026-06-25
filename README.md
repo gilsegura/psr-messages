@@ -92,6 +92,9 @@ through a property, derive copies through a method.
 
 - **`ResourceObject`** — `new ResourceObject($type, $id, $attributes)`, then
   `withOneRelationship()`, `withManyRelationship()`, `withLinks()`, `withMeta()`.
+  `withFieldset()` attaches a sparse fieldset so `serialize()` trims the attributes
+  to the fields requested for the resource's type, matched against its own type so
+  the type is never repeated.
 - **`ResourceIdentifier`** — the `{type, id}` linkage; `withMeta()` for meta.
 - **`ToOneRelationship` / `ToManyRelationship`** — linkage (a single identifier
   or a list) plus optional links and meta; `withLinks()`, `withMeta()`.
@@ -110,9 +113,11 @@ includes are matched against it (`AbstractIncludes::has($name)`).
 
 `ResourcePresenterInterface<TModel>` is the fixed shape of the output side: one
 presenter per resource in the consuming library turns a domain model into a
-`ResourceInterface`, honoring the requested sparse fieldsets. Relationships are
-passed in by the caller (e.g. a document builder resolving includes), keeping the
-presenter focused on the primary resource.
+`ResourceInterface`. It receives the requested fieldset as a `FieldsetInterface`
+(the contract the query's `AbstractFields` implements) and attaches it to the
+resource with `withFieldset()`, so the resource trims its own attributes on
+output. Relationships are passed in by the caller (e.g. a document builder
+resolving includes), keeping the presenter focused on the primary resource.
 
 ## JSON:API query parameters
 
@@ -122,7 +127,9 @@ presenter focused on the primary resource.
 fields and filters:
 
 - **`AbstractIncludes`** — owns the `include=a,b` format (`has()`, `names()`,
-  `isEmpty()`).
+  `isEmpty()`), and `select()` to pick, from the available includes, those that
+  were requested — the pure counterpart of `Fields::apply()` on the include side,
+  matching names without loading anything.
 - **`AbstractFields`** — owns the `fields[type]=a,b` format (`forType()`,
   `has()`, `apply()` for sparse fieldsets), resolving each type name to a typed
   `ResourceTypeInterface`.
@@ -134,6 +141,27 @@ fields and filters:
 A consuming library subclasses these per resource (`ArticleIncludes`,
 `ArticleFields`, `ArticleSort`, `ArticleQuery`), reusing the fixed parse format
 and only typing the result; the endpoint's JSON Schema enforces what is allowed.
+
+## Including related resources
+
+`Psr\Messages\JsonApi\Include` provides the fixed shape for compound documents
+(`?include=`). An **`IncludeInterface<TPrimary>`** is one composable relationship
+that can be embedded: it knows its `name()` and how to `resolve()` itself for a
+set of primary models in a single load — loading the related resources (through a
+query handler, never the repository), presenting them, and computing the linkage
+per primary model. The consuming library writes one implementation per
+relationship; nothing else changes when a new one is added.
+
+**`ResolvedInclude`** is the outcome of resolving one include: the embedded
+resources for the document's `included` section plus the relationship linkage
+keyed by primary-model id, produced once so it is reused for both the
+relationships and the `included` section without querying twice.
+
+`AbstractIncludes::select()` picks which available includes a request asked for
+(the pure match); resolving them (the I/O) is the caller's job, since each include
+loads through a query handler. **`Pagination`** produces the standard JSON:API
+pagination links (`self`/`first`/`last`/`prev`/`next`) and page meta from the
+requested page, the total and the request path.
 
 ## A resource's concretion
 
@@ -225,9 +253,10 @@ A read endpoint, `GET /articles?include=author&fields[articles]=title&page[numbe
    the relationships the handler resolved:
 
    ```php
-   public function present(SerializableInterface $model, AbstractFields $fields, array $relationships = []): ResourceInterface
+   public function present(SerializableInterface $model, FieldsetInterface $fields, array $relationships = []): ResourceInterface
    {
-       return (new ResourceObject(ArticleType::ARTICLE, $model->id(), new ArticleAttributes($fields->apply(ArticleType::ARTICLE, $model->serialize()))))
+       return new ResourceObject(ArticleType::ARTICLE, $model->id(), new ArticleAttributes($model->serialize()))
+           ->withFieldset($fields)
            ->withOneRelationship(Article::AUTHOR, $relationships['author']);
    }
    ```

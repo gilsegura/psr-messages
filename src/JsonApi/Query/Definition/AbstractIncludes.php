@@ -6,6 +6,7 @@ namespace Psr\Messages\JsonApi\Query\Definition;
 
 use Psr\Messages\Exception\UnsupportedSerializationException;
 use Psr\Messages\JsonApi\Document\Definition\RelationshipNameInterface;
+use Psr\Messages\JsonApi\Include\IncludeInterface;
 use Psr\Messages\Support\PathNavigator;
 use Serializer\SerializableInterface;
 
@@ -70,6 +71,36 @@ abstract readonly class AbstractIncludes implements SerializableInterface
     final public function isEmpty(): bool
     {
         return [] === $this->paths;
+    }
+
+    /**
+     * Selects, from the available includes, those requested at the top level of
+     * any include path. The pure counterpart of Fields::apply() on the include
+     * side: it matches names without loading anything, so the caller resolves
+     * only the includes that were actually asked for. Order follows availability.
+     *
+     * @template TPrimary of object
+     *
+     * @param IncludeInterface<TPrimary> ...$available
+     *
+     * @return IncludeInterface<TPrimary>[]
+     */
+    final public function select(IncludeInterface ...$available): array
+    {
+        $heads = array_fill_keys(
+            array_map(
+                static fn (Path $path) => $path->head(),
+                $this->paths,
+            ),
+            true,
+        );
+
+        return array_values(
+            array_filter(
+                $available,
+                static fn (IncludeInterface $include): bool => isset($heads[$include->name()->value]),
+            )
+        );
     }
 
     /**

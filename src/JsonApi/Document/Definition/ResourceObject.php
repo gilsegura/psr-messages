@@ -15,10 +15,12 @@ use Serializer\SerializableInterface;
  * optionally relationships, links and meta. The constructor takes only the
  * minimal identity ({type, id, attributes}); relationships, links and meta are
  * added through immutable withXxx() methods, so a resource is built up one
- * concern at a time. Build it directly, or wrap it to expose domain data.
+ * concern at a time.
  *
- * State is exposed as readonly properties (the interface contracts declare them
- * as `{ get; }`); withXxx() derive new instances.
+ * A sparse fieldset can be attached with withFieldset(): when present, serialize()
+ * trims the attributes to the fields requested for this resource's type, so
+ * applying sparse fieldsets needs no separate decorator and the type is never
+ * repeated. State is exposed as readonly properties; withXxx() derive new instances.
  */
 final readonly class ResourceObject implements ResourceInterface, HasLinksInterface, HasMetaInterface
 {
@@ -49,6 +51,7 @@ final readonly class ResourceObject implements ResourceInterface, HasLinksInterf
         array $manyRelationships = [],
         array $links = [],
         array $meta = [],
+        public ?FieldsetInterface $fieldset = null,
     ) {
         $this->oneRelationships = $oneRelationships;
         $this->manyRelationships = $manyRelationships;
@@ -62,7 +65,9 @@ final readonly class ResourceObject implements ResourceInterface, HasLinksInterf
         $object = [
             'type' => $this->type->value,
             'id' => $this->id,
-            'attributes' => $this->attributes->serialize(),
+            'attributes' => $this->fieldset instanceof FieldsetInterface
+                ? $this->fieldset->apply($this->type, $this->attributes)
+                : $this->attributes->serialize(),
         ];
 
         $relationships = $this->oneRelationships + $this->manyRelationships;
@@ -107,6 +112,7 @@ final readonly class ResourceObject implements ResourceInterface, HasLinksInterf
             $this->manyRelationships,
             $this->links,
             $this->meta,
+            $this->fieldset,
         );
     }
 
@@ -123,18 +129,28 @@ final readonly class ResourceObject implements ResourceInterface, HasLinksInterf
             [(string) $name->value => $relationship] + $this->manyRelationships,
             $this->links,
             $this->meta,
+            $this->fieldset,
         );
     }
 
     #[\Override]
     public function withLinks(Link ...$links): static
     {
-        return new self($this->type, $this->id, $this->attributes, $this->oneRelationships, $this->manyRelationships, $links, $this->meta);
+        return new self($this->type, $this->id, $this->attributes, $this->oneRelationships, $this->manyRelationships, $links, $this->meta, $this->fieldset);
     }
 
     #[\Override]
     public function withMeta(array $meta): static
     {
-        return new self($this->type, $this->id, $this->attributes, $this->oneRelationships, $this->manyRelationships, $this->links, $meta);
+        return new self($this->type, $this->id, $this->attributes, $this->oneRelationships, $this->manyRelationships, $this->links, $meta, $this->fieldset);
+    }
+
+    /**
+     * Attaches a sparse fieldset, returning a new resource whose serialize() trims
+     * the attributes to the fields requested for this resource's type.
+     */
+    public function withFieldset(FieldsetInterface $fieldset): static
+    {
+        return new self($this->type, $this->id, $this->attributes, $this->oneRelationships, $this->manyRelationships, $this->links, $this->meta, $fieldset);
     }
 }

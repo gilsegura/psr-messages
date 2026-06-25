@@ -14,6 +14,7 @@ enum StubRelationship: string implements RelationshipNameInterface
 {
     case AUTHOR = 'author';
     case COMMENTS = 'comments';
+    case TAGS = 'tags';
 
     #[\Override]
     public function equals(RelationshipNameInterface $name): bool

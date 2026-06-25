@@ -13,21 +13,24 @@ use Serializer\SerializableInterface;
  * plain-JSON flow, so an endpoint returning many items has the same shape of
  * output as one returning a single item. Output only.
  *
- * @implements SerializableInterface<array<array<string, mixed>>>
+ * @implements SerializableInterface<list<array<string, mixed>>>
  */
 final readonly class JsonCollectionDocument implements SerializableInterface
 {
-    /** @var SerializableInterface<array<string, mixed>>[] */
+    /** @var list<SerializableInterface<array<string, mixed>>> */
     private array $payloads;
 
     /**
-     * @param SerializableInterface<array<string, mixed>>[] $payloads
+     * @param SerializableInterface<array<string, mixed>> ...$payloads
      */
-    public function __construct(array $payloads)
+    public function __construct(SerializableInterface ...$payloads)
     {
-        $this->payloads = $payloads;
+        $this->payloads = array_values($payloads);
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     #[\Override]
     public function serialize(): array
     {
